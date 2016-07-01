@@ -1,0 +1,281 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+
+
+//creating a structure data type for binary search tree
+struct node{
+	
+	char data;
+	struct node *left; // address of left child
+	struct node *right; // address of right child
+};
+
+
+//tree stuff
+int search(struct node *root, char data);
+void inOrder(struct node *root);
+void postOrder(struct node *root);
+void preOrder(struct node *root);
+int height(struct node *root);
+struct node* delete(struct node *root, char data);
+struct node* findMin(struct node *root);
+struct node* findMax(struct node *root);
+struct node* createNode(char data);
+
+
+//stack stuff
+void push(struct node* x);
+struct node * pop();
+struct node * top();
+int isOpt(char ch);
+
+int top1 = -1;
+struct node * stack[100];
+
+
+int main(int argc, char *argv[]) {
+
+	struct node *bst; // creating a node pointer to store the root address of bst
+	
+	bst = NULL; //empty tree
+	
+	int i;
+	
+	
+	printf("Enter the Number of Nodes you want to Insert in the Tree: ");
+	
+	scanf("%d",&i);
+	printf("\n");
+	char ch[i];
+	
+	int j;
+	for(j = i; i>=1; i--){
+		
+		printf("Enter the data: ");
+		fflush(stdin);
+		ch[i] = getchar();
+		fflush(stdin);
+			
+		printf("\n");
+
+		if(isOpt(ch[i]) == 1){
+			
+			bst = createNode(ch[i]);
+			bst->right = pop();
+			bst->left = pop();
+			
+			push(bst);
+			
+		}else{
+			push(createNode(ch[i]));
+		}
+	}
+	
+	bst = pop(bst);
+	
+	
+	printf("Inorder Traversal: LDR\n");
+	inOrder(bst);
+	printf("\nPreorder Traversal: DLR\n");
+	preOrder(bst);
+	printf("\nPostorder Traversal: LRD\n");
+	postOrder(bst);
+	
+	
+	char ch1;
+		
+	printf("\n\nEnter a value to search in the tree: ");
+	
+	fflush(stdin);
+	ch1 = getchar();
+	printf("\n");
+	
+	int tf = (search(bst , ch1)==1?printf("\nFound\n"):printf("\nNot Found\n"));
+	
+	printf("Minimum Value in the Tree is %c\n\n", findMin(bst)->data);
+	printf("Maximum Value in the Tree is %c\n\n", findMax(bst)->data);
+	
+	printf("\nEnter a value to delete from the tree: ");
+	fflush(stdin);
+	ch1 = getchar();
+	bst = delete(bst, ch1);
+		
+		
+	printf("TREE AFTER DELETION\n\n");	
+	printf("Inorder Traversal: LDR\n");
+	inOrder(bst);
+	printf("\nPreorder Traversal: DLR\n");
+	preOrder(bst);
+	printf("\nPostorder Traversal: LRD\n");
+	postOrder(bst);	return 0;
+}
+
+struct node* createNode(char data){
+		struct node *temp = malloc(sizeof(struct node));
+		
+		(temp)->left = NULL;
+		(temp)->data = data;
+		(temp)->right = NULL;
+		
+		return  temp;
+}
+
+
+int search(struct node *root, char data){
+	
+	if(root == NULL) return 0; 
+	
+	else if(root->data == data) return 1;
+	
+	else if(data <= root->data) search(root->left, data);
+	
+	else if(data > root->data) search(root->right, data);
+}
+
+void inOrder(struct node* r)
+{
+    if(r!=NULL){
+        inOrder(r->left);
+        printf("%c ", r->data);
+        inOrder(r->right);
+    }
+}
+
+void preOrder(struct node* r)
+{
+    if(r!=NULL){
+        printf("%c ", r->data);
+        preOrder(r->left);
+        preOrder(r->right);
+    }
+}
+
+void postOrder(struct node* r)
+{
+    if(r!=NULL){
+        postOrder(r->left);
+      postOrder(r->right);
+        printf("%c ", r->data);
+
+    }
+}
+
+struct node* delete(struct node *root, char data){
+	
+	if(root == NULL) return root;
+	
+		
+	else if(data < root->data) root->left = delete(root->left, data);
+	
+	else if(data > root->data) root->right = delete(root->right, data);
+	
+	//root to be deleted is found
+	else{ 
+		
+		
+		if(root->left == NULL && root->right == NULL){
+
+			free(root);			
+			root = NULL;
+
+		}
+
+		else if(root->left == NULL){
+			
+			struct node *temp = root;
+			
+			root = root->right;
+			
+			free(temp);
+		}		
+
+		else if(root->right == NULL){
+			
+			struct node *temp = root;
+			
+			root = root->left;
+			
+			free(temp);
+		}
+		
+		else if(root->left != NULL && root->right!=NULL){
+			
+			struct node *temp = findMin(root->right);
+			
+			root->data = temp->data;
+			
+			root->right = delete(root->right, temp->data);
+		}
+		
+		return root;
+	}
+}
+
+struct node* findMin(struct node *root){
+	
+	if(root == NULL){
+		printf("The Tree is Empty\n");
+		return NULL;
+	}
+	
+	while(root->left != NULL){
+		
+		root = root->left;
+	}
+	
+	return root;
+}
+
+struct node* findMax(struct node *root){
+	
+	if(root == NULL){
+		printf("The Tree is Empty\n");
+		return NULL;
+	}
+	
+	while(root->right != NULL){
+		
+		root = root->right;
+	}
+	
+	return root;
+}
+
+
+
+
+
+
+
+
+
+//stack functions
+int isOpt(char ch){
+	
+	if(ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^')
+	return 1;
+	else
+	return 0;
+}
+
+void push(struct node* x){
+	
+	top1++;
+	stack[top1] = x;
+
+}
+
+struct node * pop(){
+	
+	struct node *temp = stack[top1];
+	stack[top1] = 0;
+	top1--;
+	
+	return temp;
+}
+
+struct node * top(){
+	return stack[top1];
+}
